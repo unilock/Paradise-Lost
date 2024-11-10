@@ -1,12 +1,14 @@
 package net.id.paradiselost.client.model;
 
 import com.google.common.collect.Maps;
+import com.terraformersmc.terraform.boat.api.client.TerraformBoatClientHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.mixin.client.rendering.EntityModelLayersAccessor;
 import net.id.paradiselost.ParadiseLost;
 import net.id.paradiselost.client.model.armor.PhoenixArmorModel;
 import net.id.paradiselost.client.model.entity.*;
+import net.id.paradiselost.items.ParadiseLostItems;
 import net.minecraft.client.model.Dilation;
 import net.minecraft.client.model.TexturedModelData;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
@@ -45,6 +47,8 @@ public class ParadiseLostModelLayers {
     }
 
     public static void initClient() {
-        // Endless void.
+		for (ParadiseLostItems.BoatSet boatSet : ParadiseLostItems.BOAT_SETS) {
+			TerraformBoatClientHelper.registerModelLayers(boatSet.id(), false);
+		}
     }
 }

@@ -8,13 +8,10 @@ val loader_version: String by properties
 val javaVersion: String by properties
 
 val fabric_version: String by properties
-val fabricAsmVersion: String by properties
 val customportalapiVersion: String by properties
 val cardinalComponentsVersion: String by properties
 val crowdinTranslateVersion: String by properties
-val modmenuVersion: String by properties
-val satinVersion: String by properties
-val clothConfigVersion: String by properties
+val terraformVersion: String by properties
 
 plugins {
     id("fabric-loom") version "1.7-SNAPSHOT"
@@ -69,11 +66,6 @@ repositories {
         name = "Modrinth"
         url = uri("https://api.modrinth.com/maven")
     }
-
-    maven {
-        name = "Jitpack"
-        url = uri("https://jitpack.io")
-    }
 }
 
 dependencies {
@@ -115,17 +107,16 @@ dependencies {
     ).also(::include).exclude(module = "sodium")
 
     modImplementation(
-            group = "com.github.Chocohead",
-            name = "Fabric-ASM",
-            version = fabricAsmVersion,
-    ).also(::include)
-
-    modImplementation(
             group = "net.fabricmc.fabric-api",
             name = "fabric-api",
             version = fabric_version,
     )
 
+    modImplementation(
+            group = "com.terraformersmc.terraform-api",
+            name = "terraform-wood-api-v1",
+            version = terraformVersion,
+    ).also(::include)
 }
 
 tasks {

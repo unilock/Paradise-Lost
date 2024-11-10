@@ -1,6 +1,8 @@
 package net.id.paradiselost.items;
 
-import com.chocohead.mm.api.ClassTinkerers;
+import com.terraformersmc.terraform.boat.api.TerraformBoatType;
+import com.terraformersmc.terraform.boat.api.TerraformBoatTypeRegistry;
+import com.terraformersmc.terraform.boat.api.item.TerraformBoatItemHelper;
 import net.id.paradiselost.blocks.ParadiseLostBlocks;
 import net.id.paradiselost.entities.ParadiseLostEntityTypes;
 import net.id.paradiselost.items.armor.ParadiseLostArmorMaterials;
@@ -16,12 +18,12 @@ import net.minecraft.block.Block;
 import net.minecraft.block.DoorBlock;
 import net.minecraft.block.TallPlantBlock;
 import net.minecraft.component.type.FoodComponent;
-import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.*;
 import net.minecraft.item.Item.Settings;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -430,10 +432,10 @@ public class ParadiseLostItems {
     public static final BlockItem ORANGE_PRESSURE_PLATE = add(ParadiseLostBlocks.ORANGE_WOODSTUFF.pressurePlate(), fuel(100));
     public static final BlockItem WISTERIA_PRESSURE_PLATE = add(ParadiseLostBlocks.WISTERIA_WOODSTUFF.pressurePlate(), fuel(100));
 
-    public static final BoatSet AUREL_BOATS = addBoatItems("aurel", "PARADISE_LOST_AUREL");
-    public static final BoatSet MOTHER_AUREL_BOATS = addBoatItems("mother_aurel", "PARADISE_LOST_MOTHER_AUREL");
-    public static final BoatSet ORANGE_BOATS = addBoatItems("orange", "PARADISE_LOST_ORANGE");
-    public static final BoatSet WISTERIA_BOATS = addBoatItems("wisteria", "PARADISE_LOST_WISTERIA");
+    public static final BoatSet AUREL_BOATS = addBoatItems("aurel", AUREL_PLANKS);
+    public static final BoatSet MOTHER_AUREL_BOATS = addBoatItems("mother_aurel", MOTHER_AUREL_PLANKS);
+    public static final BoatSet ORANGE_BOATS = addBoatItems("orange", ORANGE_PLANKS);
+    public static final BoatSet WISTERIA_BOATS = addBoatItems("wisteria", WISTERIA_PLANKS);
 
     public static final BoatSet[] BOAT_SETS = new BoatSet[] {AUREL_BOATS, MOTHER_AUREL_BOATS, ORANGE_BOATS, WISTERIA_BOATS};
 
@@ -476,21 +478,32 @@ public class ParadiseLostItems {
                 additionalActions);
     }
 
-    private static BoatSet addBoatItems(String woodId, String boatTypeId) {
-        String boatId = (MOD_ID + "_" + woodId);
+    private static BoatSet addBoatItems(String woodId, BlockItem planks) {
+        Identifier boatId = Identifier.of(MOD_ID, woodId+"_boat");
+		Identifier chestBoatId = Identifier.of(MOD_ID, woodId+"_chest_boat");
+		RegistryKey<TerraformBoatType> boatKey = TerraformBoatTypeRegistry.createKey(boatId);
 
-        BoatEntity.Type boatType = ClassTinkerers.getEnum(BoatEntity.Type.class, boatTypeId);
+		Item boat = TerraformBoatItemHelper.registerBoatItem(boatId, boatKey, false);
+		Item chestBoat = TerraformBoatItemHelper.registerBoatItem(chestBoatId, boatKey, true);
 
-        BoatItem boat = add(woodId + "_boat", new BoatItem(false, boatType, new Settings().maxCount(1)), fuel(1200));
-        BoatItem chestBoat = add(woodId + "_chest_boat", new BoatItem(true, boatType, new Settings().maxCount(1)), fuel(1200));
+		fuel(1200).accept(boat);
+		fuel(1200).accept(chestBoat);
 
-        return new BoatSet(boatType, boat, chestBoat);
+		TerraformBoatType type = new TerraformBoatType.Builder()
+				.item(boat)
+				.chestItem(chestBoat)
+				.planks(planks)
+				.build();
+
+		Registry.register(TerraformBoatTypeRegistry.INSTANCE, boatKey, type);
+
+        return new BoatSet(boatId, boat, chestBoat);
     }
 
     public record BoatSet(
-            BoatEntity.Type type,
-            BoatItem boat,
-            BoatItem chestBoat
+			Identifier id,
+			Item boat,
+			Item chestBoat
     ) implements Iterable<Item> {
         public @NotNull Iterator<Item> iterator() {
             return Arrays.stream(new Item[]{boat, chestBoat}).iterator();
